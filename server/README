@@ -1,0 +1,6 @@
+server/
+├── common/          # 放数据库连接、通用配置
+├── model/           # 放数据库模型结构体 (struct)
+├── controller/      # 放业务逻辑
+├── routes/          # 放路由定义
+└── main.go          # 入口文件
