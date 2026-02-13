@@ -17,6 +17,10 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 			userGroup.POST("/register", controller.Register)
 			userGroup.POST("/login", controller.Login)
 		}
+		// 获取列表：GET /api/posts?page=1
+		apiGroup.GET("/posts", controller.GetPostList)
+		// 获取详情：GET /api/posts/1
+		apiGroup.GET("/posts/:id", controller.GetPostDetail)
 
 		// --- 受保护路由 (需要登录) ---
 		// 使用 AuthMiddleware 中间件保护这些接口
