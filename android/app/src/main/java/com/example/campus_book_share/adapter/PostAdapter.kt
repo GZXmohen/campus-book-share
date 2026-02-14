@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.campus_book_share.R
 import com.example.campus_book_share.model.Post
 
-class PostAdapter(private var postList: List<Post>) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+class PostAdapter(private var postList: List<Post>,private val onItemClick: (Int) -> Unit) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     // 1. 创建视图 (也就是加载 item_post.xml)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -35,6 +35,12 @@ class PostAdapter(private var postList: List<Post>) : RecyclerView.Adapter<PostA
             holder.tvRentPrice.text = "租 ￥${post.rent_price}"
         } else {
             holder.tvRentPrice.visibility = View.GONE
+        }
+
+        // 设置点击监听
+        holder.itemView.setOnClickListener {
+            // 调用回调函数，把图书ID传出去
+            onItemClick(post.ID)
         }
     }
 

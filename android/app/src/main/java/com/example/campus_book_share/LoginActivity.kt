@@ -3,6 +3,7 @@ package com.example.campus_book_share
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -22,6 +23,34 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // --- 开始修改 ActionBar ---
+        supportActionBar?.apply {
+            // 1. 开启“自定义视图”模式
+            setDisplayShowCustomEnabled(true)
+            // 2. 隐藏系统自带的左对齐标题
+            setDisplayShowTitleEnabled(false)
+            // 3. 开启返回箭头
+            // setDisplayHomeAsUpEnabled(true)
+
+            // 4. 先填充布局，得到 View 对象
+            val customTitleView = LayoutInflater.from(this@LoginActivity).inflate(R.layout.action_bar_title, null)
+
+            // 5. 创建布局参数，并指定 Gravity.CENTER (居中关键！)
+            val params = androidx.appcompat.app.ActionBar.LayoutParams(
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.CENTER
+            )
+
+            // 6. 将 View 对象和布局参数一起设置为自定义视图
+            setCustomView(customTitleView, params)
+        }
+
+            // 7. 动态修改标题文字 (因为 XML 里写死的是“标题”)
+        val tvTitle = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
+        tvTitle?.text = "登录界面"
+            // --- 修改结束 ---
 
         val etUsername = findViewById<EditText>(R.id.etUsername)
         val etPassword = findViewById<EditText>(R.id.etPassword)

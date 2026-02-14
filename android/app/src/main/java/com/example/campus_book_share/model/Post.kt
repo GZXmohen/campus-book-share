@@ -17,5 +17,6 @@ data class Post(
     val is_rent: Boolean,
     val rent_price: Double,
     val cover_image: String?,
+    val contact_wx: String?,
     // 还可以加上 user 信息，暂时先不加，保持简单
 )

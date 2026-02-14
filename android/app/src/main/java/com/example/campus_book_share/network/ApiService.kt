@@ -8,6 +8,7 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 // 定义登录请求的参数结构
 data class LoginRequest(val username: String, val password: String)
@@ -22,4 +23,7 @@ interface ApiService {
     // 发布图书
     @POST("api/post/create")
     fun createPost(@Body post: PostRequest): Call<PublishPostResponse>
+    // 获取详情：GET /api/posts/{id}
+    @GET("api/posts/{id}")
+    fun getPostDetail(@Path("id") id: Int): Call<PublishPostResponse>
 }

@@ -3,6 +3,8 @@ package com.example.campus_book_share
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -34,6 +36,33 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        // --- 开始修改 ActionBar ---
+        supportActionBar?.apply {
+            // 1. 开启“自定义视图”模式
+            setDisplayShowCustomEnabled(true)
+            // 2. 隐藏系统自带的左对齐标题
+            setDisplayShowTitleEnabled(false)
+            // 3. 开启返回箭头
+            // setDisplayHomeAsUpEnabled(true)
+
+            // 4. 先填充布局，得到 View 对象
+            val customTitleView = LayoutInflater.from(this@MainActivity).inflate(R.layout.action_bar_title, null)
+
+            // 5. 创建布局参数，并指定 Gravity.CENTER (居中关键！)
+            val params = androidx.appcompat.app.ActionBar.LayoutParams(
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.CENTER
+            )
+
+            // 6. 将 View 对象和布局参数一起设置为自定义视图
+            setCustomView(customTitleView, params)
+        }
+
+        // 7. 动态修改标题文字 (因为 XML 里写死的是“标题”)
+        val tvTitle = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
+        tvTitle?.text = "图书广场"
+        // --- 修改结束 ---
 
         // --- 正式代码 ---
         val fabPublish = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabPublish)
@@ -46,7 +75,12 @@ class MainActivity : AppCompatActivity() {
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout) // 绑定控件
 
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = PostAdapter(emptyList())
+        adapter = PostAdapter(emptyList()){ postId ->
+            // 跳转到详情页
+            val intent = Intent(this, DetailActivity::class.java)
+            intent.putExtra("POST_ID", postId) // 把 ID 传过去
+            startActivity(intent)
+        }
         recyclerView.adapter = adapter
 
         // 2. 设置下拉刷新的监听器

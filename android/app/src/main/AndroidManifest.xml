@@ -16,6 +16,9 @@
         android:theme="@style/Theme.Campusbookshare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".DetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".PublishActivity"
             android:exported="false" />
         <activity

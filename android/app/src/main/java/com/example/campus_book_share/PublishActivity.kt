@@ -1,10 +1,12 @@
 package com.example.campus_book_share
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -28,6 +30,34 @@ class PublishActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        // --- 开始修改 ActionBar ---
+        supportActionBar?.apply {
+            // 1. 开启“自定义视图”模式
+            setDisplayShowCustomEnabled(true)
+            // 2. 隐藏系统自带的左对齐标题
+            setDisplayShowTitleEnabled(false)
+            // 3. 开启返回箭头
+            setDisplayHomeAsUpEnabled(true)
+
+            // 4. 先填充布局，得到 View 对象
+            val customTitleView = LayoutInflater.from(this@PublishActivity).inflate(R.layout.action_bar_title, null)
+
+            // 5. 创建布局参数，并指定 Gravity.CENTER (居中关键！)
+            val params = androidx.appcompat.app.ActionBar.LayoutParams(
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.CENTER
+            )
+
+            // 6. 将 View 对象和布局参数一起设置为自定义视图
+            setCustomView(customTitleView, params)
+        }
+
+        // 7. 动态修改标题文字 (因为 XML 里写死的是“标题”)
+        val tvTitle = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
+        tvTitle?.text = "发布图书"
+        // --- 修改结束 ---
 
         // 绑定控件
         val etTitle = findViewById<EditText>(R.id.etTitle)
@@ -105,5 +135,10 @@ class PublishActivity : AppCompatActivity() {
                 }
             })
         }
+    }
+    // 处理箭头的点击事件
+    override fun onSupportNavigateUp(): Boolean {
+        finish() // 关闭当前页面，相当于按了手机返回键
+        return true
     }
 }
