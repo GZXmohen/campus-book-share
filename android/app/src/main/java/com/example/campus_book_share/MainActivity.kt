@@ -1,5 +1,6 @@
 package com.example.campus_book_share
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -18,6 +19,7 @@ import com.example.campus_book_share.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.jvm.java
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -34,6 +36,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         // --- 正式代码 ---
+        val fabPublish = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabPublish)
+        fabPublish.setOnClickListener {
+            // 跳转到发布页
+            startActivity(Intent(this, PublishActivity::class.java))
+        }
         // 1. 初始化控件
         recyclerView = findViewById(R.id.recyclerView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout) // 绑定控件
