@@ -16,7 +16,9 @@ object AppContext {
 
 object RetrofitClient {
     // 模拟器专用 IP，千万别写 localhost
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    // private const val BASE_URL = "http://10.0.2.2:8080/"
+    //我的电脑（实机） 专用 IP
+    private const val BASE_URL = "http://192.168.10.11:8080/"
 
 
     // 1. 定义拦截器：自动加 Token

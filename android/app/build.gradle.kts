@@ -4,6 +4,27 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") { // 注意这里是 create("release")
+            storeFile = file("D:/campus-book-share/Key_store_path/campus_book_key.jks")
+            storePassword = "zhangxun4436"
+            keyAlias = "book_alias"
+            keyPassword = "zhangxun4436"
+            isV1SigningEnabled = true
+            isV2SigningEnabled = true
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release") // 这里也要改
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
     namespace = "com.example.campus_book_share"
     compileSdk {
         version = release(36)
