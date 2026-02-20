@@ -88,7 +88,8 @@ class LoginActivity : AppCompatActivity() {
         }
 
         tvRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+            // 这里以后做注册页面的跳转
+            Toast.makeText(this, "注册功能稍后开发", Toast.LENGTH_SHORT).show()
         }
     }
 
