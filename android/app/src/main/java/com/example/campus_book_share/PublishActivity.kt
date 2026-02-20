@@ -1,26 +1,46 @@
 package com.example.campus_book_share
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import com.example.campus_book_share.model.PostRequest
-import com.example.campus_book_share.model.PostResponse
 import com.example.campus_book_share.model.PublishPostResponse
+import com.example.campus_book_share.model.UploadResponse
 import com.example.campus_book_share.network.RetrofitClient
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 
 class PublishActivity : AppCompatActivity() {
+    private var coverImageUrl: String = "http://dummyimage.com/200x300"
+    private lateinit var ivCoverPreview: ImageView
+    private lateinit var btnSelectImage: Button
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            Glide.with(this).load(it).into(ivCoverPreview)
+            uploadImage(it)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -31,35 +51,25 @@ class PublishActivity : AppCompatActivity() {
             insets
         }
 
-        // --- 开始修改 ActionBar ---
         supportActionBar?.apply {
-            // 1. 开启“自定义视图”模式
             setDisplayShowCustomEnabled(true)
-            // 2. 隐藏系统自带的左对齐标题
             setDisplayShowTitleEnabled(false)
-            // 3. 开启返回箭头
             setDisplayHomeAsUpEnabled(true)
 
-            // 4. 先填充布局，得到 View 对象
             val customTitleView = LayoutInflater.from(this@PublishActivity).inflate(R.layout.action_bar_title, null)
-
-            // 5. 创建布局参数，并指定 Gravity.CENTER (居中关键！)
             val params = androidx.appcompat.app.ActionBar.LayoutParams(
                 androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
                 androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
                 android.view.Gravity.CENTER
             )
-
-            // 6. 将 View 对象和布局参数一起设置为自定义视图
             setCustomView(customTitleView, params)
         }
 
-        // 7. 动态修改标题文字 (因为 XML 里写死的是“标题”)
         val tvTitle = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
         tvTitle?.text = "发布图书"
-        // --- 修改结束 ---
 
-        // 绑定控件
+        ivCoverPreview = findViewById(R.id.ivCoverPreview)
+        btnSelectImage = findViewById(R.id.btnSelectImage)
         val etTitle = findViewById<EditText>(R.id.etTitle)
         val etAuthor = findViewById<EditText>(R.id.etAuthor)
         val etDesc = findViewById<EditText>(R.id.etDesc)
@@ -70,7 +80,10 @@ class PublishActivity : AppCompatActivity() {
         val etContact = findViewById<EditText>(R.id.etContact)
         val btnSubmit = findViewById<Button>(R.id.btnSubmit)
 
-        // 交互逻辑：勾选才显示价格输入框
+        btnSelectImage.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
+
         cbSell.setOnCheckedChangeListener { _, isChecked ->
             etSalePrice.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
@@ -79,13 +92,11 @@ class PublishActivity : AppCompatActivity() {
         }
 
         btnSubmit.setOnClickListener {
-            // 1. 获取数据
             val title = etTitle.text.toString()
             val author = etAuthor.text.toString()
             val desc = etDesc.text.toString()
             val contact = etContact.text.toString()
 
-            // 2. 简单校验
             if (title.isEmpty() || author.isEmpty() || contact.isEmpty()) {
                 Toast.makeText(this, "请补全必填信息", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -95,7 +106,6 @@ class PublishActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 3. 构造请求对象
             val salePrice = if (cbSell.isChecked && etSalePrice.text.isNotEmpty())
                 etSalePrice.text.toString().toDouble() else 0.0
             val rentPrice = if (cbRent.isChecked && etRentPrice.text.isNotEmpty())
@@ -105,40 +115,66 @@ class PublishActivity : AppCompatActivity() {
                 title = title, author = author, description = desc,
                 is_sell = cbSell.isChecked, sale_price = salePrice,
                 is_rent = cbRent.isChecked, rent_price = rentPrice,
-                contact_wx = contact
+                contact_wx = contact,
+                cover_image = coverImageUrl
             )
 
-            // 4. 发送网络请求
             RetrofitClient.apiService.createPost(request).enqueue(object : Callback<PublishPostResponse> {
                 override fun onResponse(call: Call<PublishPostResponse>, response: Response<PublishPostResponse>) {
                     if (response.isSuccessful) {
                         val publishResponse = response.body()
-                        // 双重校验：后端返回成功 + 业务码200
                         if (publishResponse != null && publishResponse.code == 200) {
                             Toast.makeText(this@PublishActivity, publishResponse.msg, Toast.LENGTH_SHORT).show()
-                            finish() // 关闭页面返回首页
+                            finish()
                         } else {
-                            // 后端返回了，但业务码不是200（比如参数错误）
                             val errMsg = publishResponse?.msg ?: "发布失败：参数错误"
                             Toast.makeText(this@PublishActivity, errMsg, Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        // HTTP状态码不是200（比如404、500）
                         Toast.makeText(this@PublishActivity, "发布失败: HTTP${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
                 override fun onFailure(call: Call<PublishPostResponse>, t: Throwable) {
-                    // 真正的网络错误（比如没网、服务器连不上），打印异常方便调试
                     Toast.makeText(this@PublishActivity, "网络错误: ${t.message}", Toast.LENGTH_SHORT).show()
-                    // 调试用：打印异常信息（能看到具体是解析失败还是真没网）
                     t.printStackTrace()
                 }
             })
         }
     }
-    // 处理箭头的点击事件
+
+    private fun uploadImage(uri: Uri) {
+        val inputStream = contentResolver.openInputStream(uri)
+        val file = File(cacheDir, "temp_image.jpg")
+        inputStream?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        val requestFile = file.asRequestBody("image/*".toMediaType())
+        val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
+
+        RetrofitClient.apiService.uploadImage(body).enqueue(object : Callback<UploadResponse> {
+            override fun onResponse(call: Call<UploadResponse>, response: Response<UploadResponse>) {
+                if (response.isSuccessful && response.body()?.code == 200) {
+                    val url = response.body()?.data?.url
+                    url?.let {
+                        coverImageUrl = it
+                        Toast.makeText(this@PublishActivity, "图片上传成功", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this@PublishActivity, "图片上传失败", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
+                Toast.makeText(this@PublishActivity, "图片上传失败: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     override fun onSupportNavigateUp(): Boolean {
-        finish() // 关闭当前页面，相当于按了手机返回键
+        finish()
         return true
     }
 }

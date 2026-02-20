@@ -4,14 +4,18 @@ import com.example.campus_book_share.model.LoginResponse
 import com.example.campus_book_share.model.PostRequest
 import com.example.campus_book_share.model.PostResponse
 import com.example.campus_book_share.model.PublishPostResponse
+import com.example.campus_book_share.model.UploadResponse
 import com.example.campus_book_share.model.User
 import com.example.campus_book_share.model.UserResponse
+import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -44,4 +48,7 @@ interface ApiService {
 
     @DELETE("api/post/{id}")
     fun deletePost(@Path("id") id: Int): Call<PublishPostResponse>
+    @Multipart
+    @POST("api/upload")
+    fun uploadImage(@Part image: MultipartBody.Part): Call<UploadResponse>
 }

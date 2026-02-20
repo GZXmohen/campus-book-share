@@ -9,6 +9,5 @@ data class PostRequest(
     val is_rent: Boolean,
     val rent_price: Double,
     val contact_wx: String,
-    // cover_image 暂时先留空或者写死一个 URL
     val cover_image: String = "http://dummyimage.com/200x300"
 )

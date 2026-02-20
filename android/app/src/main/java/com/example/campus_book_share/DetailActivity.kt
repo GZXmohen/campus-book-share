@@ -8,12 +8,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import com.example.campus_book_share.model.PublishPostResponse
 import com.example.campus_book_share.network.RetrofitClient
 import retrofit2.Call
@@ -88,6 +90,21 @@ class DetailActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.tvDetailAuthor).text = "作者：${post?.author}"
                     findViewById<TextView>(R.id.tvDetailDesc).text = post?.description
                     findViewById<TextView>(R.id.tvContactWx).text = "微信号：${post?.contact_wx}"
+
+                    val ivCover = findViewById<ImageView>(R.id.ivDetailCover)
+                    val imageUrl = if (!post?.cover_image.isNullOrEmpty()) {
+                        if (post?.cover_image?.startsWith("http") == true) {
+                            post.cover_image
+                        } else {
+                            RetrofitClient.BASE_URL + post?.cover_image?.removePrefix("/")
+                        }
+                    } else {
+                        null
+                    }
+
+                    if (imageUrl != null) {
+                        Glide.with(this@DetailActivity).load(imageUrl).into(ivCover)
+                    }
 
                     val tvSale = findViewById<TextView>(R.id.tvDetailSalePrice)
                     if (post != null) {

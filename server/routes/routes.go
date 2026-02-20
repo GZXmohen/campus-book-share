@@ -33,6 +33,8 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 			userInfoGroup.GET("/info", controller.GetUserInfo)
 			userInfoGroup.PUT("/info", controller.UpdateUserInfo)
 		}
+
+		apiGroup.POST("/upload", middleware.AuthMiddleware(), controller.UploadImage)
 	}
 
 	return r
