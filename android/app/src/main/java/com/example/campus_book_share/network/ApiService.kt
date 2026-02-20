@@ -1,5 +1,6 @@
 package com.example.campus_book_share.network
 
+import com.example.campus_book_share.RegisterRequest
 import com.example.campus_book_share.model.LoginResponse
 import com.example.campus_book_share.model.PostRequest
 import com.example.campus_book_share.model.PostResponse
@@ -45,7 +46,8 @@ interface ApiService {
     fun getMyPosts(): Call<PostResponse>
     @PUT("api/post/{id}")
     fun updatePost(@Path("id") id: Int, @Body post: PostRequest): Call<PublishPostResponse>
-
+    @POST("api/auth/register")
+    fun register(@Body request: RegisterRequest): Call<LoginResponse>
     @DELETE("api/post/{id}")
     fun deletePost(@Path("id") id: Int): Call<PublishPostResponse>
     @Multipart

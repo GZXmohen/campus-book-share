@@ -20,6 +20,9 @@
             android:name=".DetailActivity"
             android:exported="false" />
         <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
             android:name=".PublishActivity"
             android:exported="false" />
         <activity

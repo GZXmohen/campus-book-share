@@ -92,7 +92,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         tvRegister.setOnClickListener {
-            Toast.makeText(this, "注册功能稍后开发", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 
