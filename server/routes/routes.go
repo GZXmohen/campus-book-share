@@ -23,6 +23,8 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 		{
 			postGroup.POST("/create", controller.CreatePost)
 			postGroup.GET("/my", controller.GetMyPosts)
+			postGroup.PUT("/:id", controller.UpdatePost)
+			postGroup.DELETE("/:id", controller.DeletePost)
 		}
 
 		userInfoGroup := apiGroup.Group("/user")

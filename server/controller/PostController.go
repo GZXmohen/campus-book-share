@@ -108,3 +108,69 @@ func GetMyPosts(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": posts, "msg": "获取成功"})
 }
+func UpdatePost(ctx *gin.Context) {
+	postId := ctx.Param("id")
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	var updateData model.Post
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "数据格式错误"})
+		return
+	}
+
+	db := common.GetDB()
+	var post model.Post
+	if err := db.First(&post, postId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "帖子不存在"})
+		return
+	}
+
+	if post.UserId != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"code": 403, "msg": "无权编辑"})
+		return
+	}
+
+	post.Title = updateData.Title
+	post.Author = updateData.Author
+	post.Description = updateData.Description
+	post.CoverImage = updateData.CoverImage
+	post.IsSell = updateData.IsSell
+	post.SalePrice = updateData.SalePrice
+	post.IsRent = updateData.IsRent
+	post.RentPrice = updateData.RentPrice
+	post.ContactWX = updateData.ContactWX
+	post.ContactQQ = updateData.ContactQQ
+
+	db.Save(&post)
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": post, "msg": "更新成功"})
+}
+
+func DeletePost(ctx *gin.Context) {
+	postId := ctx.Param("id")
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	db := common.GetDB()
+	var post model.Post
+	if err := db.First(&post, postId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "帖子不存在"})
+		return
+	}
+
+	if post.UserId != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"code": 403, "msg": "无权删除"})
+		return
+	}
+
+	db.Delete(&post)
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "删除成功"})
+}

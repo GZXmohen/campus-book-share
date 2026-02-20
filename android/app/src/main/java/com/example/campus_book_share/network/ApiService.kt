@@ -8,6 +8,7 @@ import com.example.campus_book_share.model.User
 import com.example.campus_book_share.model.UserResponse
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -38,5 +39,9 @@ interface ApiService {
 
     @GET("api/post/my")
     fun getMyPosts(): Call<PostResponse>
+    @PUT("api/post/{id}")
+    fun updatePost(@Path("id") id: Int, @Body post: PostRequest): Call<PublishPostResponse>
 
+    @DELETE("api/post/{id}")
+    fun deletePost(@Path("id") id: Int): Call<PublishPostResponse>
 }
