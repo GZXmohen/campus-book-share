@@ -1,5 +1,6 @@
 package com.example.campus_book_share.network
 
+import com.example.campus_book_share.RegisterRequest
 import com.example.campus_book_share.model.LoginResponse
 import com.example.campus_book_share.model.PostRequest
 import com.example.campus_book_share.model.PostResponse
@@ -23,6 +24,8 @@ import retrofit2.http.Query
 data class LoginRequest(val username: String, val password: String)
 
 interface ApiService {
+    @POST("api/auth/register")
+    fun register(@Body request: RegisterRequest): Call<LoginResponse>
     @POST("api/auth/login") // 对应 Go 后端的路由
     fun login(@Body request: LoginRequest): Call<LoginResponse>
     // 获取图书列表
