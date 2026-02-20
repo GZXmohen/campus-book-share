@@ -90,3 +90,21 @@ func GetPostDetail(ctx *gin.Context) {
 		"msg":  "获取成功",
 	})
 }
+func GetMyPosts(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	db := common.GetDB()
+	var posts []model.Post
+	db.Where("user_id = ?", currentUser.ID).Preload("User").Order("created_at desc").Find(&posts)
+
+	for i := range posts {
+		posts[i].User.Password = ""
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": posts, "msg": "获取成功"})
+}

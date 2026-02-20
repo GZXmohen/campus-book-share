@@ -96,3 +96,44 @@ func isUserExist(db *gorm.DB, username string) bool {
 	db.Where("username = ?", username).First(&user)
 	return user.ID != 0
 }
+func GetUserInfo(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+	currentUser.Password = ""
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": currentUser, "msg": "获取成功"})
+}
+
+func UpdateUserInfo(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	var updateData model.User
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "数据格式错误"})
+		return
+	}
+
+	db := common.GetDB()
+	if updateData.ContactWX != "" {
+		currentUser.ContactWX = updateData.ContactWX
+	}
+	if updateData.StudentId != "" {
+		currentUser.StudentId = updateData.StudentId
+	}
+	if updateData.Avatar != "" {
+		currentUser.Avatar = updateData.Avatar
+	}
+
+	db.Save(&currentUser)
+	currentUser.Password = ""
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": currentUser, "msg": "更新成功"})
+}

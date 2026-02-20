@@ -40,7 +40,10 @@ class MainActivity : AppCompatActivity() {
         }
         val etSearch = findViewById<EditText>(R.id.etSearch)
         val btnSearch = findViewById<Button>(R.id.btnSearch)
-
+        val btnProfile = findViewById<Button>(R.id.btnProfile)
+        btnProfile.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
         btnSearch.setOnClickListener {
             val keyword = etSearch.text.toString().trim()
             loadPosts(keyword)
