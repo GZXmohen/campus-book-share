@@ -22,40 +22,44 @@ import retrofit2.Callback
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (isLoggedIn()) {
+            navigateToHome()
+            return
+        }
+
         setContentView(R.layout.activity_login)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
-        // --- 开始修改 ActionBar ---
         supportActionBar?.apply {
-            // 1. 开启“自定义视图”模式
             setDisplayShowCustomEnabled(true)
-            // 2. 隐藏系统自带的左对齐标题
             setDisplayShowTitleEnabled(false)
-            // 3. 开启返回箭头
-            // setDisplayHomeAsUpEnabled(true)
 
-            // 4. 先填充布局，得到 View 对象
             val customTitleView = LayoutInflater.from(this@LoginActivity).inflate(R.layout.action_bar_title, null)
-
-            // 5. 创建布局参数，并指定 Gravity.CENTER (居中关键！)
             val params = androidx.appcompat.app.ActionBar.LayoutParams(
                 androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
                 androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
                 android.view.Gravity.CENTER
             )
-
-            // 6. 将 View 对象和布局参数一起设置为自定义视图
             setCustomView(customTitleView, params)
         }
 
-            // 7. 动态修改标题文字 (因为 XML 里写死的是“标题”)
         val tvTitle = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
         tvTitle?.text = "登录界面"
-            // --- 修改结束 ---
 
         val etUsername = findViewById<EditText>(R.id.etUsername)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val tvRegister = findViewById<TextView>(R.id.tvRegister)
+
+        val savedUsername = getSavedUsername()
+        if (savedUsername.isNotEmpty()) {
+            etUsername.setText(savedUsername)
+        }
 
         btnLogin.setOnClickListener {
             val username = etUsername.text.toString().trim()
@@ -66,15 +70,15 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 发起登录请求
             val request = LoginRequest(username, password)
             RetrofitClient.apiService.login(request).enqueue(object : Callback<LoginResponse> {
                 override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                     if (response.isSuccessful && response.body()?.code == 200) {
                         val token = response.body()?.data?.token
                         if (token != null) {
-                            saveToken(token) // 1. 保存 Token
-                            navigateToHome() // 2. 跳转首页
+                            saveToken(token)
+                            saveUsername(username)
+                            navigateToHome()
                         }
                     } else {
                         Toast.makeText(this@LoginActivity, "登录失败: 账号或密码错误", Toast.LENGTH_SHORT).show()
@@ -88,21 +92,34 @@ class LoginActivity : AppCompatActivity() {
         }
 
         tvRegister.setOnClickListener {
-            // 这里以后做注册页面的跳转
             Toast.makeText(this, "注册功能稍后开发", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // 保存 Token 到 SharedPreferences (安卓自带的轻量级存储)
+    private fun isLoggedIn(): Boolean {
+        val sp = getSharedPreferences("book_share_data", Context.MODE_PRIVATE)
+        val token = sp.getString("token", "")
+        return !token.isNullOrEmpty()
+    }
+
     private fun saveToken(token: String) {
         val sp = getSharedPreferences("book_share_data", Context.MODE_PRIVATE)
         sp.edit().putString("token", token).apply()
     }
 
-    // 跳转到主页 (MainActivity)
+    private fun saveUsername(username: String) {
+        val sp = getSharedPreferences("book_share_data", Context.MODE_PRIVATE)
+        sp.edit().putString("username", username).apply()
+    }
+
+    private fun getSavedUsername(): String {
+        val sp = getSharedPreferences("book_share_data", Context.MODE_PRIVATE)
+        return sp.getString("username", "") ?: ""
+    }
+
     private fun navigateToHome() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish() // 销毁登录页，防止用户按返回键又回到登录页
+        finish()
     }
 }

@@ -1,6 +1,7 @@
 package com.example.campus_book_share
 
 import android.content.Intent
+import android.content.Context
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -52,6 +53,10 @@ class ProfileActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             updateUserInfo()
+        }
+        val btnLogout = findViewById<Button>(R.id.btnLogout)
+        btnLogout.setOnClickListener {
+            logout()
         }
     }
 
@@ -115,5 +120,14 @@ class ProfileActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadMyPosts()
+    }
+    private fun logout() {
+        val sp = getSharedPreferences("book_share_data", Context.MODE_PRIVATE)
+        sp.edit().clear().apply()
+
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }
