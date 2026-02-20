@@ -41,21 +41,22 @@ func CreatePost(ctx *gin.Context) {
 func GetPostList(ctx *gin.Context) {
 	db := common.GetDB()
 
-	// 获取分页参数 (默认第1页，每页10条)
 	page := ctx.DefaultQuery("page", "1")
+	keyword := ctx.DefaultQuery("keyword", "")
 	pageSize := 10
 
-	// 计算偏移量
 	pageInt, _ := strconv.Atoi(page)
 	offset := (pageInt - 1) * pageSize
 
 	var posts []model.Post
-	// Preload("User") 会自动填充 User 字段，但在 User model 里要注意隐私，别把密码查出来了
-	// Order("created_at desc") 让最新的帖子排在最前面
-	db.Preload("User").Order("created_at desc").Offset(offset).Limit(pageSize).Find(&posts)
+	query := db.Preload("User").Order("created_at desc")
 
-	// 手动清除密码，防止泄露！
-	// 因为 posts 是一个切片，我们遍历它，把每个 User 的 Password 设为空字符串
+	if keyword != "" {
+		query = query.Where("title LIKE ? OR author LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
+
+	query.Offset(offset).Limit(pageSize).Find(&posts)
+
 	for i := range posts {
 		posts[i].User.Password = ""
 	}

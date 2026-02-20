@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -35,6 +37,13 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+        val etSearch = findViewById<EditText>(R.id.etSearch)
+        val btnSearch = findViewById<Button>(R.id.btnSearch)
+
+        btnSearch.setOnClickListener {
+            val keyword = etSearch.text.toString().trim()
+            loadPosts(keyword)
         }
         // --- 开始修改 ActionBar ---
         supportActionBar?.apply {
@@ -96,32 +105,22 @@ class MainActivity : AppCompatActivity() {
         // 每次回到这个页面，都会自动刷新
         loadPosts()
     }
-    private fun loadPosts() {
-        // 开始请求前，可以让刷新圈圈转起来（可选）
+    private fun loadPosts(keyword: String = "") {
         swipeRefreshLayout.isRefreshing = true
 
-        RetrofitClient.apiService.getPosts().enqueue(object : Callback<PostResponse> {
+        RetrofitClient.apiService.getPosts(keyword).enqueue(object : Callback<PostResponse> {
             override fun onResponse(call: Call<PostResponse>, response: Response<PostResponse>) {
-                // 请求结束，停止转圈圈
                 swipeRefreshLayout.isRefreshing = false
-
                 if (response.isSuccessful) {
                     val posts = response.body()?.data
                     if (posts != null) {
-                        // 清空旧数据，换上新数据
-                        // 如果要做的更高级，可以用 DiffUtil，但毕设这样足够了
                         adapter.updateData(posts)
-                        Toast.makeText(this@MainActivity, "刷新成功", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this@MainActivity, "加载失败", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<PostResponse>, t: Throwable) {
-                // 请求失败也要停止转圈圈，否则它会一直转
                 swipeRefreshLayout.isRefreshing = false
-                Toast.makeText(this@MainActivity, "网络错误: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
