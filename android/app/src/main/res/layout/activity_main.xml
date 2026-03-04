@@ -38,6 +38,13 @@
                 android:layout_marginStart="8dp" />
 
             <Button
+                android:id="@+id/btnNotification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="通知"
+                android:layout_marginStart="8dp" />
+
+            <Button
                 android:id="@+id/btnProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

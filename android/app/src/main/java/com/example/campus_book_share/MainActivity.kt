@@ -41,8 +41,12 @@ class MainActivity : AppCompatActivity() {
         val etSearch = findViewById<EditText>(R.id.etSearch)
         val btnSearch = findViewById<Button>(R.id.btnSearch)
         val btnProfile = findViewById<Button>(R.id.btnProfile)
+        val btnNotification = findViewById<Button>(R.id.btnNotification)
         btnProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
+        }
+        btnNotification.setOnClickListener {
+            startActivity(Intent(this, NotificationActivity::class.java))
         }
         btnSearch.setOnClickListener {
             val keyword = etSearch.text.toString().trim()

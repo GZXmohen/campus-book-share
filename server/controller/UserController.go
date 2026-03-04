@@ -187,3 +187,65 @@ func ChangePassword(ctx *gin.Context) {
 	currentUser.Password = ""
 	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": currentUser, "msg": "密码修改成功"})
 }
+
+// GetNotifications 获取用户通知列表
+func GetNotifications(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	DB := common.GetDB()
+	var notifications []model.Notification
+	if err := DB.Where("user_id = ?", currentUser.ID).Preload("Post").Preload("Comment").Preload("Comment.User").Order("created_at desc").Find(&notifications).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "获取通知失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": notifications,
+		"msg":  "获取通知成功",
+	})
+}
+
+// MarkNotificationAsRead 标记通知为已读
+func MarkNotificationAsRead(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	notificationId := ctx.Param("id")
+	if notificationId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "通知ID不能为空"})
+		return
+	}
+
+	DB := common.GetDB()
+	var notification model.Notification
+	if err := DB.First(&notification, notificationId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "通知不存在"})
+		return
+	}
+
+	// 验证权限（只有通知接收者可以标记）
+	if notification.UserId != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"code": 403, "msg": "无权操作此通知"})
+		return
+	}
+
+	// 标记为已读
+	notification.IsRead = true
+	DB.Save(&notification)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": notification,
+		"msg":  "标记成功",
+	})
+}

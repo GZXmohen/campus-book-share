@@ -43,6 +43,8 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 			userInfoGroup.GET("/info", controller.GetUserInfo)
 			userInfoGroup.PUT("/info", controller.UpdateUserInfo)
 			userInfoGroup.POST("/change-password", controller.ChangePassword)
+			userInfoGroup.GET("/notifications", controller.GetNotifications)
+			userInfoGroup.PUT("/notifications/:id", controller.MarkNotificationAsRead)
 		}
 
 		apiGroup.POST("/upload", middleware.AuthMiddleware(), controller.UploadImage)

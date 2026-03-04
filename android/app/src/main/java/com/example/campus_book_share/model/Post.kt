@@ -8,7 +8,7 @@ data class PostResponse(
 )
 
 data class Post(
-    val ID: Int, // GORM 的 Model 默认 id 是 ID
+    val ID: Int, // 改为大写 ID 以匹配后端 JSON 结构
     val user_id: Int?, // 帖子的用户 ID，改为可空类型
     val title: String,
     val author: String,

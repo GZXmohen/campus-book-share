@@ -3,6 +3,7 @@ package com.example.campus_book_share.network
 import com.example.campus_book_share.RegisterRequest
 import com.example.campus_book_share.model.Comment
 import com.example.campus_book_share.model.LoginResponse
+import com.example.campus_book_share.model.Notification
 import com.example.campus_book_share.model.PostRequest
 import com.example.campus_book_share.model.PostResponse
 import com.example.campus_book_share.model.PublishPostResponse
@@ -35,6 +36,12 @@ data class CommentListResponse(val code: Int, val msg: String, val data: List<Co
 
 // 定义修改密码请求的参数结构
 data class ChangePasswordRequest(val old_password: String, val new_password: String)
+
+// 定义通知响应的结构
+data class NotificationResponse(val code: Int, val msg: String, val data: Notification)
+
+// 定义通知列表响应的结构
+data class NotificationListResponse(val code: Int, val msg: String, val data: List<Notification>)
 
 interface ApiService {
     @POST("api/auth/login") // 对应 Go 后端的路由
@@ -78,4 +85,10 @@ interface ApiService {
     // 修改密码
     @POST("api/user/change-password")
     fun changePassword(@Body request: ChangePasswordRequest): Call<UserResponse>
+    
+    // 通知相关接口
+    @GET("api/user/notifications")
+    fun getNotifications(): Call<NotificationListResponse>
+    @PUT("api/user/notifications/{id}")
+    fun markNotificationAsRead(@Path("id") id: Int): Call<NotificationResponse>
 }
