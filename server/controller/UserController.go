@@ -204,6 +204,11 @@ func GetNotifications(ctx *gin.Context) {
 		return
 	}
 
+	// 打印通知数据到日志
+	for _, notification := range notifications {
+		print("通知ID:", notification.ID, " 内容:", notification.Content, " 已读:", notification.IsRead, "\n")
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": notifications,
