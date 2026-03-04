@@ -1,6 +1,7 @@
 package com.example.campus_book_share.network
 
 import com.example.campus_book_share.RegisterRequest
+import com.example.campus_book_share.model.Comment
 import com.example.campus_book_share.model.LoginResponse
 import com.example.campus_book_share.model.PostRequest
 import com.example.campus_book_share.model.PostResponse
@@ -22,6 +23,18 @@ import retrofit2.http.Query
 
 // 定义登录请求的参数结构
 data class LoginRequest(val username: String, val password: String)
+
+// 定义评论请求的参数结构
+data class CommentRequest(val post_id: Int, val content: String)
+
+// 定义评论响应的结构
+data class CommentResponse(val code: Int, val msg: String, val data: Comment)
+
+// 定义评论列表响应的结构
+data class CommentListResponse(val code: Int, val msg: String, val data: List<Comment>)
+
+// 定义修改密码请求的参数结构
+data class ChangePasswordRequest(val old_password: String, val new_password: String)
 
 interface ApiService {
     @POST("api/auth/login") // 对应 Go 后端的路由
@@ -53,4 +66,16 @@ interface ApiService {
     @Multipart
     @POST("api/upload")
     fun uploadImage(@Part image: MultipartBody.Part): Call<UploadResponse>
+    
+    // 评论相关接口
+    @POST("api/comment/create")
+    fun createComment(@Body request: CommentRequest): Call<CommentResponse>
+    @GET("api/posts/{id}/comments")
+    fun getPostComments(@Path("id") postId: Int): Call<CommentListResponse>
+    @DELETE("api/comment/{id}")
+    fun deleteComment(@Path("id") commentId: Int): Call<CommentResponse>
+    
+    // 修改密码
+    @POST("api/user/change-password")
+    fun changePassword(@Body request: ChangePasswordRequest): Call<UserResponse>
 }

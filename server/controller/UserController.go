@@ -137,3 +137,53 @@ func UpdateUserInfo(ctx *gin.Context) {
 	currentUser.Password = ""
 	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": currentUser, "msg": "更新成功"})
 }
+
+// ChangePassword 修改密码接口
+func ChangePassword(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	// 1. 获取参数
+	type ChangePasswordRequest struct {
+		OldPassword string `json:"old_password"`
+		NewPassword string `json:"new_password"`
+	}
+
+	var request ChangePasswordRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "参数格式错误"})
+		return
+	}
+
+	// 2. 验证旧密码
+	if err := bcrypt.CompareHashAndPassword([]byte(currentUser.Password), []byte(request.OldPassword)); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "旧密码错误"})
+		return
+	}
+
+	// 3. 验证新密码长度
+	if len(request.NewPassword) < 6 {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"code": 422, "msg": "新密码长度不能少于6位"})
+		return
+	}
+
+	// 4. 加密新密码
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "加密错误"})
+		return
+	}
+
+	// 5. 更新密码
+	db := common.GetDB()
+	currentUser.Password = string(hashedPassword)
+	db.Save(&currentUser)
+
+	// 6. 返回结果
+	currentUser.Password = ""
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "data": currentUser, "msg": "密码修改成功"})
+}

@@ -1,7 +1,7 @@
 package com.example.campus_book_share.model
 
 data class User(
-    val id: Int = 0,
+    val id: Int? = null, // 改为可空类型
     val username: String = "",
     val student_id: String? = null,
     val contact_wx: String? = null,

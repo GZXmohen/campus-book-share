@@ -42,6 +42,9 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// 清空密码字段，避免泄露
+		user.Password = ""
+
 		// *** 关键点 ***
 		// 把用户对象存在 gin 的上下文里，后续的 Controller 可以直接取出来用
 		ctx.Set("user", user)

@@ -76,13 +76,17 @@ func GetPostDetail(ctx *gin.Context) {
 	postId := ctx.Param("id")
 
 	var post model.Post
-	// 查询并预加载发布者信息
-	if err := db.Preload("User").First(&post, postId).Error; err != nil {
+	// 查询并预加载发布者信息和评论信息
+	if err := db.Preload("User").Preload("Comments.User").First(&post, postId).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "帖子不存在"})
 		return
 	}
 	// 防止泄露密码
 	post.User.Password = ""
+	// 清理评论中的用户密码
+	for i := range post.Comments {
+		post.Comments[i].User.Password = ""
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 200,

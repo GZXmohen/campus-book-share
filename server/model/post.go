@@ -23,4 +23,7 @@ type Post struct {
 	// 联系方式 (冗余字段，方便直接展示)
 	ContactWX string `gorm:"type:varchar(50);not null" json:"contact_wx"`
 	ContactQQ string `gorm:"type:varchar(50)" json:"contact_qq"`
+
+	// 关联评论
+	Comments []Comment `gorm:"foreignKey:PostId" json:"comments"`
 }

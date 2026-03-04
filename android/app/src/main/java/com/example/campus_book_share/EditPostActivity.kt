@@ -3,13 +3,19 @@ package com.example.campus_book_share
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.campus_book_share.model.PostRequest
 import com.example.campus_book_share.model.PublishPostResponse
@@ -47,10 +53,30 @@ class EditPostActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_publish)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.publish)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
-        supportActionBar?.title = "编辑帖子"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.apply {
+            setDisplayShowCustomEnabled(true)
+            setDisplayShowTitleEnabled(false)
+            setDisplayHomeAsUpEnabled(true)
+
+            val customTitleView = LayoutInflater.from(this@EditPostActivity).inflate(R.layout.action_bar_title, null)
+            val params = androidx.appcompat.app.ActionBar.LayoutParams(
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                androidx.appcompat.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER
+            )
+            setCustomView(customTitleView, params)
+        }
+
+        val tvTitle = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
+        tvTitle?.text = "编辑帖子"
 
         etTitle = findViewById(R.id.etTitle)
         etAuthor = findViewById(R.id.etAuthor)

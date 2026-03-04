@@ -19,7 +19,7 @@ func InitDB() *gorm.DB {
 
 	// 自动迁移模式：GORM 会自动创建表！
 	// 如果改了 struct 字段，重启后表结构也会自动更新
-	db.AutoMigrate(&model.User{}, &model.Post{})
+	db.AutoMigrate(&model.User{}, &model.Post{}, &model.Comment{})
 
 	DB = db
 	fmt.Println("数据库连接成功，表结构已迁移！")

@@ -9,6 +9,7 @@ data class PostResponse(
 
 data class Post(
     val ID: Int, // GORM 的 Model 默认 id 是 ID
+    val user_id: Int?, // 帖子的用户 ID，改为可空类型
     val title: String,
     val author: String,
     val description: String,
@@ -18,5 +19,6 @@ data class Post(
     val rent_price: Double,
     val cover_image: String?,
     val contact_wx: String?,
-    // 还可以加上 user 信息，暂时先不加，保持简单
+    val user: User? = null,
+    val comments: List<Comment>? = null
 )
