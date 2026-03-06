@@ -1,0 +1,2 @@
+学习使用HTTP来进行网络交互、XML和JSON格式数据的解析方式、编程语言的回调机制、Retrofit的用法和kotlin中的协程；
+继续学习MaterialDesign

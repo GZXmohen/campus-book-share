@@ -1,0 +1,28 @@
+返回上一步
+adb shell input keyevent 4
+
+确认设备连接：
+adb devices
+确认跳转
+adb shell input keyevent KEYCODE_ENTER
+# 按右方向键（快进）
+adb shell input keyevent KEYCODE_DPAD_RIGHT
+# 长按右方向键（持续快进）
+adb shell input keyevent --longpress KEYCODE_DPAD_RIGHT
+启动应用
+adb shell am start -n com.wyt.iexuetang.tv.zxxtb/com.wyt.common.ui.adv.AdvertisingActivity2
+# 上键
+adb shell input keyevent KEYCODE_DPAD_UP
+
+# 下键
+adb shell input keyevent KEYCODE_DPAD_DOWN
+
+# 左键
+adb shell input keyevent KEYCODE_DPAD_LEFT
+
+# 右键
+adb shell input keyevent KEYCODE_DPAD_RIGHT
+
+adb shell am start -n com.wyt.iexuetang.tv.zxxtb/com.wyt.mod.course.ui.course.CourseActivity2 --es course_id 8542 --es resource_id 236958
+
+adb shell am start -n com.wyt.iexuetang.tv.zxxtb/com.wyt.mod.course.ui.course.CourseActivity2 --es course_id 5677 --es catalog_id 111560（看日志）
