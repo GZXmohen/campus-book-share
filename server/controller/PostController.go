@@ -178,3 +178,104 @@ func DeletePost(ctx *gin.Context) {
 	db.Delete(&post)
 	ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "删除成功"})
 }
+
+// GetPostComments 获取帖子评论
+func GetPostComments(ctx *gin.Context) {
+	db := common.GetDB()
+
+	// 从 URL 参数获取 postId
+	postId := ctx.Param("id")
+
+	var comments []model.Comment
+	// 查询并预加载评论者信息
+	if err := db.Where("post_id = ?", postId).Preload("User").Order("created_at desc").Find(&comments).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "获取评论失败"})
+		return
+	}
+
+	// 清理评论中的用户密码
+	for i := range comments {
+		comments[i].User.Password = ""
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": comments,
+		"msg":  "获取成功",
+	})
+}
+
+// CreateComment 创建评论
+func CreateComment(ctx *gin.Context) {
+	var requestComment struct {
+		PostId  uint   `json:"post_id" binding:"required"`
+		Content string `json:"content" binding:"required"`
+	}
+
+	// 1. 数据绑定
+	if err := ctx.ShouldBindJSON(&requestComment); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "数据格式错误"})
+		return
+	}
+
+	// 2. 获取当前登录用户 (从中间件里取)
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	// 类型断言，把 interface{} 转回 model.User
+	currentUser := user.(model.User)
+
+	// 3. 检查帖子是否存在
+	db := common.GetDB()
+	var post model.Post
+	if err := db.First(&post, requestComment.PostId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "帖子不存在"})
+		return
+	}
+
+	// 4. 创建评论
+	comment := model.Comment{
+		PostId:  requestComment.PostId,
+		UserId:  currentUser.ID,
+		Content: requestComment.Content,
+	}
+
+	if err := db.Create(&comment).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "评论失败"})
+		return
+	}
+
+	// 5. 加载评论者信息
+	db.Preload("User").First(&comment, comment.ID)
+	comment.User.Password = ""
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "评论成功", "data": comment})
+}
+
+// DeleteComment 删除评论
+func DeleteComment(ctx *gin.Context) {
+	commentId := ctx.Param("id")
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	currentUser := user.(model.User)
+
+	db := common.GetDB()
+	var comment model.Comment
+	if err := db.First(&comment, commentId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "评论不存在"})
+		return
+	}
+
+	if comment.UserId != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"code": 403, "msg": "无权删除"})
+		return
+	}
+
+	db.Delete(&comment)
+	ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "删除成功"})
+}

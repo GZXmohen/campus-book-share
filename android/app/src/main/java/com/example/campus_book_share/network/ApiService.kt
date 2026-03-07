@@ -10,6 +10,9 @@ import com.example.campus_book_share.model.PublishPostResponse
 import com.example.campus_book_share.model.UploadResponse
 import com.example.campus_book_share.model.User
 import com.example.campus_book_share.model.UserResponse
+import com.example.campus_book_share.network.CommentRequest
+import com.example.campus_book_share.network.CommentResponse
+import com.example.campus_book_share.network.CommentListResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -24,15 +27,6 @@ import retrofit2.http.Query
 
 // 定义登录请求的参数结构
 data class LoginRequest(val username: String, val password: String)
-
-// 定义评论请求的参数结构
-data class CommentRequest(val post_id: Int, val content: String)
-
-// 定义评论响应的结构
-data class CommentResponse(val code: Int, val msg: String, val data: Comment)
-
-// 定义评论列表响应的结构
-data class CommentListResponse(val code: Int, val msg: String, val data: List<Comment>)
 
 // 定义修改密码请求的参数结构
 data class ChangePasswordRequest(val old_password: String, val new_password: String)

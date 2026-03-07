@@ -1,5 +1,7 @@
 package com.example.campus_book_share.model
 
+import com.example.campus_book_share.model.Comment
+
 // 对应后端 GetPostList 接口返回的结构
 data class PostResponse(
     val code: Int,

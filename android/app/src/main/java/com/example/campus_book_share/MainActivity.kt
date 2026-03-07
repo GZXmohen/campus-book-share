@@ -23,7 +23,7 @@ import com.example.campus_book_share.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.jvm.java
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
