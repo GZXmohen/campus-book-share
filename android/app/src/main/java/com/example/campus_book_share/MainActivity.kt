@@ -44,11 +44,15 @@ class MainActivity : AppCompatActivity() {
         val btnSearch = findViewById<Button>(R.id.btnSearch)
         val btnProfile = findViewById<Button>(R.id.btnProfile)
         val btnNotification = findViewById<Button>(R.id.btnNotification)
+        val btnHome = findViewById<Button>(R.id.btnHome)
         btnProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
         btnNotification.setOnClickListener {
             startActivity(Intent(this, NotificationActivity::class.java))
+        }
+        btnHome.setOnClickListener {
+            loadPosts()
         }
         btnSearch.setOnClickListener {
             val keyword = etSearch.text.toString().trim()
@@ -83,8 +87,8 @@ class MainActivity : AppCompatActivity() {
         // --- 修改结束 ---
 
         // --- 正式代码 ---
-        val fabPublish = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabPublish)
-        fabPublish.setOnClickListener {
+        val btnPublish = findViewById<Button>(R.id.btnPublish)
+        btnPublish.setOnClickListener {
             // 跳转到发布页
             startActivity(Intent(this, PublishActivity::class.java))
         }
@@ -143,6 +147,10 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val posts = response.body()?.data
                     if (posts != null) {
+                        println("Loaded ${posts.size} posts")
+                        for (post in posts) {
+                            println("Post ID: ${post.ID}, Title: ${post.title}, Cover Image: ${post.cover_image}")
+                        }
                         adapter.updateData(posts)
                     }
                 }
@@ -150,6 +158,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<PostResponse>, t: Throwable) {
                 swipeRefreshLayout.isRefreshing = false
+                println("Failed to load posts: ${t.message}")
             }
         })
     }

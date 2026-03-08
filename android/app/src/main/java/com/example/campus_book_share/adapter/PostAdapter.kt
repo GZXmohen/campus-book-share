@@ -33,7 +33,7 @@ class PostAdapter(private var postList: List<Post>,private val onItemClick: (Int
             null
         }
 
-        if (imageUrl != null) {
+        if (imageUrl != null && imageUrl.isNotEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(imageUrl)
                 .into(holder.ivCover)

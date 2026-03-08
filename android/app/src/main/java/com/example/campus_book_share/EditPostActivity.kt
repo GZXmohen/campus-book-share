@@ -140,6 +140,8 @@ class EditPostActivity : AppCompatActivity() {
                     }
                     if (imageUrl != null) {
                         Glide.with(this@EditPostActivity).load(imageUrl).into(ivCoverPreview)
+                    } else {
+                        ivCoverPreview.setImageResource(R.color.teal_200)
                     }
 
                     if (post?.is_sell == true) {

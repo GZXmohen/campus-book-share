@@ -145,6 +145,8 @@ class DetailActivity : AppCompatActivity() {
 
                     if (imageUrl != null) {
                         Glide.with(this@DetailActivity).load(imageUrl).into(ivCover)
+                    } else {
+                        ivCover.setImageResource(R.color.teal_200)
                     }
 
                     val tvSale = findViewById<TextView>(R.id.tvDetailSalePrice)

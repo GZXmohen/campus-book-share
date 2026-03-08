@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">campus-book-share</string>
+    <string name="app_name">闲舒：图书共享平台</string>
     <string name="title_activity_login">LoginActivity</string>
 </resources>
