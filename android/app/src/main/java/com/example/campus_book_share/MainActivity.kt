@@ -113,6 +113,26 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // 每次回到这个页面，都会自动刷新
         loadPosts()
+        // 检查是否有未读通知
+        checkUnreadNotifications()
+    }
+
+    private fun checkUnreadNotifications() {
+        RetrofitClient.apiService.getNotifications().enqueue(object : Callback<com.example.campus_book_share.network.NotificationListResponse> {
+            override fun onResponse(call: Call<com.example.campus_book_share.network.NotificationListResponse>, response: Response<com.example.campus_book_share.network.NotificationListResponse>) {
+                if (response.isSuccessful) {
+                    val notifications = response.body()?.data ?: emptyList()
+                    // 检查是否有未读通知
+                    val hasUnread = notifications.any { !it.is_read }
+                    val notificationBadge = findViewById<android.view.View>(R.id.notification_badge)
+                    notificationBadge.visibility = if (hasUnread) android.view.View.VISIBLE else android.view.View.GONE
+                }
+            }
+
+            override fun onFailure(call: Call<com.example.campus_book_share.network.NotificationListResponse>, t: Throwable) {
+                println("Failed to check unread notifications: ${t.message}")
+            }
+        })
     }
     private fun loadPosts(keyword: String = "") {
         swipeRefreshLayout.isRefreshing = true
