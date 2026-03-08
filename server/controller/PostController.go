@@ -3,9 +3,10 @@ package controller
 import (
 	"bookshare/common"
 	"bookshare/model"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CreatePost(ctx *gin.Context) {
@@ -74,10 +75,12 @@ func GetPostDetail(ctx *gin.Context) {
 
 	// 从 URL 参数获取 postId
 	postId := ctx.Param("id")
+	print("GetPostDetail: postId = ", postId, "\n")
 
 	var post model.Post
 	// 查询并预加载发布者信息和评论信息
 	if err := db.Preload("User").Preload("Comments.User").First(&post, postId).Error; err != nil {
+		print("GetPostDetail: error = ", err.Error(), "\n")
 		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "帖子不存在"})
 		return
 	}
@@ -247,7 +250,19 @@ func CreateComment(ctx *gin.Context) {
 		return
 	}
 
-	// 5. 加载评论者信息
+	// 5. 为帖子作者创建通知
+	if post.UserId != currentUser.ID {
+		notification := model.Notification{
+			UserId:  post.UserId,
+			Type:    1, // 1-评论通知
+			Content: currentUser.Username + " 评论了你的帖子",
+			PostId:  &post.ID,
+			IsRead:  false,
+		}
+		db.Create(&notification)
+	}
+
+	// 6. 加载评论者信息
 	db.Preload("User").First(&comment, comment.ID)
 	comment.User.Password = ""
 
@@ -266,10 +281,18 @@ func DeleteComment(ctx *gin.Context) {
 
 	db := common.GetDB()
 	var comment model.Comment
+	
+	// 打印日志，查看传递的commentId
+	print("DeleteComment: commentId = ", commentId, "\n")
+	
+	// 直接使用commentId查询
 	if err := db.First(&comment, commentId).Error; err != nil {
+		print("DeleteComment: error = ", err.Error(), "\n")
 		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "评论不存在"})
 		return
 	}
+	
+	print("DeleteComment: found comment with ID = ", comment.ID, " UserId = ", comment.UserId, " CurrentUserId = ", currentUser.ID, "\n")
 
 	if comment.UserId != currentUser.ID {
 		ctx.JSON(http.StatusForbidden, gin.H{"code": 403, "msg": "无权删除"})

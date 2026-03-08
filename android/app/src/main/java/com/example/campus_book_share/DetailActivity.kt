@@ -69,7 +69,7 @@ class DetailActivity : AppCompatActivity() {
         tvTitle?.text = "图书详情"
 
         postId = intent.getIntExtra("POST_ID", -1)
-        if (postId == -1) {
+        if (postId == -1 || postId == 0) {
             Toast.makeText(this, "数据错误", Toast.LENGTH_SHORT).show()
             finish()
             return
@@ -117,6 +117,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun loadDetail(id: Int) {
+        println("Loading post detail with ID: $id")
         RetrofitClient.apiService.getPostDetail(id).enqueue(object : Callback<PublishPostResponse> {
             override fun onResponse(call: Call<PublishPostResponse>, response: Response<PublishPostResponse>) {
                 if (response.isSuccessful && response.body()?.data != null) {

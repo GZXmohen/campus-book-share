@@ -3,10 +3,11 @@ package controller
 import (
 	"bookshare/common"
 	"bookshare/model"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 // Register 注册接口
@@ -199,7 +200,7 @@ func GetNotifications(ctx *gin.Context) {
 
 	DB := common.GetDB()
 	var notifications []model.Notification
-	if err := DB.Where("user_id = ?", currentUser.ID).Preload("Post").Preload("Comment").Preload("Comment.User").Order("created_at desc").Find(&notifications).Error; err != nil {
+	if err := DB.Where("user_id = ?", currentUser.ID).Preload("Post").Preload("User").Order("created_at desc").Find(&notifications).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "获取通知失败"})
 		return
 	}

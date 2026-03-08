@@ -1,6 +1,10 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"encoding/json"
+
+	"gorm.io/gorm"
+)
 
 type Post struct {
 	gorm.Model
@@ -26,4 +30,41 @@ type Post struct {
 
 	// 关联评论
 	Comments []Comment `gorm:"foreignKey:PostId" json:"comments"`
+}
+
+// 重写JSON序列化
+func (p Post) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		ID          uint      `json:"ID"`
+		UserID      uint      `json:"user_id"`
+		User        User      `json:"user"`
+		Title       string    `json:"title"`
+		Author      string    `json:"author"`
+		Description string    `json:"description"`
+		CoverImage  string    `json:"cover_image"`
+		IsSell      bool      `json:"is_sell"`
+		SalePrice   float64   `json:"sale_price"`
+		IsRent      bool      `json:"is_rent"`
+		RentPrice   float64   `json:"rent_price"`
+		ContactWX   string    `json:"contact_wx"`
+		ContactQQ   string    `json:"contact_qq"`
+		Comments    []Comment `json:"comments"`
+		CreatedAt   string    `json:"created_at"`
+	}{
+		ID:          p.ID,
+		UserID:      p.UserId,
+		User:        p.User,
+		Title:       p.Title,
+		Author:      p.Author,
+		Description: p.Description,
+		CoverImage:  p.CoverImage,
+		IsSell:      p.IsSell,
+		SalePrice:   p.SalePrice,
+		IsRent:      p.IsRent,
+		RentPrice:   p.RentPrice,
+		ContactWX:   p.ContactWX,
+		ContactQQ:   p.ContactQQ,
+		Comments:    p.Comments,
+		CreatedAt:   p.CreatedAt.Format("2006-01-02 15:04:05"),
+	})
 }

@@ -1,6 +1,10 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"encoding/json"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -9,5 +13,16 @@ type User struct {
 	StudentId string `gorm:"type:varchar(20)" json:"student_id"`
 	Avatar    string `gorm:"type:varchar(255)" json:"avatar"`
 	ContactWX string `gorm:"type:varchar(50)" json:"contact_wx"`
-	ID        uint   `json:"id"` // 显式定义 ID 字段，确保正确序列化
+}
+
+// 重写JSON序列化，将ID转换为id
+func (u User) MarshalJSON() ([]byte, error) {
+	type Alias User
+	return json.Marshal(&struct {
+		ID uint `json:"id"`
+		*Alias
+	}{
+		ID:    u.ID,
+		Alias: (*Alias)(&u),
+	})
 }
