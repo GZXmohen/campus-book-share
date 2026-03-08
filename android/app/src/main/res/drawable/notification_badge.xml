@@ -1,0 +1,19 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 底层：白色描边（作为外圈） -->
+    <item
+        android:left="1dp"
+        android:right="1dp"
+        android:top="1dp"
+        android:bottom="1dp">
+        <shape android:shape="oval">
+            <solid android:color="#F5222D" /> <!-- 红色填充 -->
+        </shape>
+    </item>
+    <!-- 外层：白色圆环（描边） -->
+    <shape android:shape="oval">
+        <stroke
+            android:width="2dp"
+            android:color="#FFFFFF" /> <!-- 白色描边 -->
+        <solid android:color="@android:color/transparent" /> <!-- 中间透明 -->
+    </shape>
+</layer-list>
