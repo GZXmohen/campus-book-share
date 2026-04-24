@@ -1,0 +1,142 @@
+<template>
+  <div class="comments-page">
+    <el-card class="filter-card">
+      <el-form :inline="true" :model="filterForm">
+        <el-form-item label="评论内容">
+          <el-input v-model="filterForm.content" placeholder="请输入关键词" clearable />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card class="table-card">
+      <el-table :data="commentList" v-loading="loading" stripe>
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="content" label="评论内容" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="user.username" label="评论者" width="100" />
+        <el-table-column label="所属图书" min-width="150">
+          <template #default="{ row }">
+            {{ row.post_title || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="评论时间" width="180" />
+        <el-table-column label="操作" width="120" align="center">
+          <template #default="{ row }">
+            <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="pagination">
+        <el-pagination
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.pageSize"
+          :total="pagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { commentAPI } from '../api'
+
+const loading = ref(false)
+const commentList = ref([])
+
+const filterForm = reactive({
+  content: ''
+})
+
+const pagination = reactive({
+  page: 1,
+  pageSize: 10,
+  total: 0
+})
+
+const loadComments = async () => {
+  loading.value = true
+  try {
+    const res = await commentAPI.list({
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      content: filterForm.content
+    })
+    commentList.value = res.data.list || []
+    pagination.total = res.data.total || 0
+  } catch (error) {
+    console.error('Failed to load comments:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleSearch = () => {
+  pagination.page = 1
+  loadComments()
+}
+
+const handleReset = () => {
+  filterForm.content = ''
+  handleSearch()
+}
+
+const handleSizeChange = (val) => {
+  pagination.pageSize = val
+  loadComments()
+}
+
+const handleCurrentChange = (val) => {
+  pagination.page = val
+  loadComments()
+}
+
+const handleDelete = (row) => {
+  ElMessageBox.confirm('确定要删除这条评论吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      await commentAPI.delete(row.id)
+      ElMessage.success('删除成功')
+      loadComments()
+    } catch (error) {
+      console.error('Failed to delete comment:', error)
+    }
+  }).catch(() => {})
+}
+
+onMounted(() => {
+  loadComments()
+})
+</script>
+
+<style scoped>
+.comments-page {
+  padding: 20px;
+}
+
+.filter-card {
+  margin-bottom: 20px;
+}
+
+.table-card {
+  background: white;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+</style>

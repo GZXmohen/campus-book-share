@@ -188,17 +188,23 @@ func GetPostComments(ctx *gin.Context) {
 
 	// 从 URL 参数获取 postId
 	postId := ctx.Param("id")
+	print("GetPostComments: postId = ", postId, "\n")
 
 	var comments []model.Comment
 	// 查询并预加载评论者信息
 	if err := db.Where("post_id = ?", postId).Preload("User").Order("created_at desc").Find(&comments).Error; err != nil {
+		print("GetPostComments: error = ", err.Error(), "\n")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "获取评论失败"})
 		return
 	}
 
+	print("GetPostComments: found ", len(comments), " comments\n")
+
 	// 清理评论中的用户密码
 	for i := range comments {
-		comments[i].User.Password = ""
+		if comments[i].User.ID != 0 {
+			comments[i].User.Password = ""
+		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
@@ -281,17 +287,17 @@ func DeleteComment(ctx *gin.Context) {
 
 	db := common.GetDB()
 	var comment model.Comment
-	
+
 	// 打印日志，查看传递的commentId
 	print("DeleteComment: commentId = ", commentId, "\n")
-	
+
 	// 直接使用commentId查询
 	if err := db.First(&comment, commentId).Error; err != nil {
 		print("DeleteComment: error = ", err.Error(), "\n")
 		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "评论不存在"})
 		return
 	}
-	
+
 	print("DeleteComment: found comment with ID = ", comment.ID, " UserId = ", comment.UserId, " CurrentUserId = ", currentUser.ID, "\n")
 
 	if comment.UserId != currentUser.ID {

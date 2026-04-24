@@ -14,18 +14,17 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 		{
 			userGroup.POST("/register", controller.Register)
 			userGroup.POST("/login", controller.Login)
+			userGroup.POST("/admin/login", controller.AdminLogin)
 		}
 		apiGroup.GET("/posts", controller.GetPostList)
 		apiGroup.GET("/posts/:id", controller.GetPostDetail)
-
-		// 评论相关路由
-		apiGroup.GET("/posts/:id/comments", controller.GetPostComments) // 获取帖子评论
+		apiGroup.GET("/posts/:id/comments", controller.GetPostComments)
 
 		commentGroup := apiGroup.Group("/comment")
 		commentGroup.Use(middleware.AuthMiddleware())
 		{
-			commentGroup.POST("/create", controller.CreateComment) // 创建评论
-			commentGroup.DELETE("/:id", controller.DeleteComment)  // 删除评论
+			commentGroup.POST("/create", controller.CreateComment)
+			commentGroup.DELETE("/:id", controller.DeleteComment)
 		}
 
 		postGroup := apiGroup.Group("/post")
@@ -48,6 +47,22 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 		}
 
 		apiGroup.POST("/upload", middleware.AuthMiddleware(), controller.UploadImage)
+
+		adminGroup := apiGroup.Group("/admin")
+		adminGroup.Use(middleware.AuthMiddleware())
+		{
+			adminGroup.GET("/stats/dashboard", controller.AdminDashboard)
+			adminGroup.GET("/stats/post-trend", controller.AdminGetPostTrend)
+			adminGroup.GET("/stats/trade-distribution", controller.AdminGetTradeDistribution)
+			adminGroup.GET("/users", controller.AdminGetUsers)
+			adminGroup.DELETE("/users/:id", controller.AdminDeleteUser)
+			adminGroup.GET("/posts", controller.AdminGetPosts)
+			adminGroup.DELETE("/posts/:id", controller.AdminDeletePost)
+			adminGroup.GET("/comments", controller.AdminGetComments)
+			adminGroup.DELETE("/comments/:id", controller.AdminDeleteComment)
+			adminGroup.GET("/notifications", controller.AdminGetNotifications)
+			adminGroup.DELETE("/notifications/:id", controller.AdminDeleteNotification)
+		}
 	}
 
 	return r
