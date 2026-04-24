@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c67b9d8b-fcb1-4b19-92cd-17561523d82a" name="更改" comment="提交web端README">
-      <change afterPath="$PROJECT_DIR$/android/README" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="c67b9d8b-fcb1-4b19-92cd-17561523d82a" name="更改" comment="提交安卓客户端README" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -137,7 +134,8 @@
     <MESSAGE value="上传apk包" />
     <MESSAGE value="添加web管理员端，v2.0.0" />
     <MESSAGE value="提交web端README" />
-    <option name="LAST_COMMIT_MESSAGE" value="提交web端README" />
+    <MESSAGE value="提交安卓客户端README" />
+    <option name="LAST_COMMIT_MESSAGE" value="提交安卓客户端README" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
