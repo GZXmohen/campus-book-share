@@ -1,0 +1,5 @@
+实机测试：
+    在cmd终端输入ipconfig，查看IPV4地址，将
+    campus-book-share\android\app\src\main\java\com\example\campus_book_share\network\RetrofitClient.kt
+    下的const val BASE_URL = "http://192.168.43.233:8080/"换成对应IP
+    然后点击 other 下的 assembleRelease 打包，最后安装测试即可
