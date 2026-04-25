@@ -19,6 +19,9 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 		apiGroup.GET("/posts", controller.GetPostList)
 		apiGroup.GET("/posts/:id", controller.GetPostDetail)
 		apiGroup.GET("/posts/:id/comments", controller.GetPostComments)
+		apiGroup.GET("/posts/:id/similar", controller.GetSimilarBooks)
+		apiGroup.GET("/posts/search", controller.SearchBooks)
+		apiGroup.POST("/posts/refresh-recommend", controller.RefreshRecommendIndex)
 
 		commentGroup := apiGroup.Group("/comment")
 		commentGroup.Use(middleware.AuthMiddleware())

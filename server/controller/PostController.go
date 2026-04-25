@@ -3,6 +3,9 @@ package controller
 import (
 	"bookshare/common"
 	"bookshare/model"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -307,4 +310,148 @@ func DeleteComment(ctx *gin.Context) {
 
 	db.Delete(&comment)
 	ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "删除成功"})
+}
+
+const PythonRecommenderURL = "http://localhost:5000"
+
+type SimilarBook struct {
+	BookID     uint    `json:"book_id"`
+	Similarity float64 `json:"similarity"`
+	Title      string  `json:"title"`
+	Author     string  `json:"author"`
+	CoverImage string  `json:"cover_image"`
+	SalePrice  float64 `json:"sale_price"`
+	RentPrice  float64 `json:"rent_price"`
+}
+
+type RecommendResponse struct {
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Data    []SimilarBook `json:"data"`
+}
+
+func GetSimilarBooks(ctx *gin.Context) {
+	postId := ctx.Param("id")
+	topK := ctx.DefaultQuery("top_k", "5")
+
+	url := fmt.Sprintf("%s/api/recommend/similar/%s?top_k=%s", PythonRecommenderURL, postId, topK)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"code": 503,
+			"msg":  "推荐服务不可用",
+			"data": []SimilarBook{},
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "读取推荐结果失败",
+			"data": []SimilarBook{},
+		})
+		return
+	}
+
+	var recommendResp RecommendResponse
+	if err := json.Unmarshal(body, &recommendResp); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "解析推荐结果失败",
+			"data": []SimilarBook{},
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "获取成功",
+		"data": recommendResp.Data,
+	})
+}
+
+func RefreshRecommendIndex(ctx *gin.Context) {
+	url := fmt.Sprintf("%s/api/recommend/refresh", PythonRecommenderURL)
+
+	resp, err := http.Post(url, "application/json", nil)
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"code": 503,
+			"msg":  "推荐服务不可用",
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "刷新索引失败",
+		})
+		return
+	}
+
+	ctx.Data(http.StatusOK, "application/json", body)
+}
+
+func SearchBooks(ctx *gin.Context) {
+	keywords := ctx.Query("keywords")
+	topK := ctx.DefaultQuery("top_k", "10")
+
+	if keywords == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code": 400,
+			"msg":  "keywords参数不能为空",
+			"data": []SimilarBook{},
+		})
+		return
+	}
+
+	url := fmt.Sprintf("%s/api/recommend/search?keywords=%s&top_k=%s", PythonRecommenderURL, keywords, topK)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"code": 503,
+			"msg":  "推荐服务不可用",
+			"data": []SimilarBook{},
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "搜索失败",
+			"data": []SimilarBook{},
+		})
+		return
+	}
+
+	var recommendResp struct {
+		Code    int                      `json:"code"`
+		Message string                   `json:"message"`
+		Data    []map[string]interface{} `json:"data"`
+	}
+	if err := json.Unmarshal(body, &recommendResp); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "解析搜索结果失败",
+			"data": []SimilarBook{},
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "获取成功",
+		"data": recommendResp.Data,
+	})
 }

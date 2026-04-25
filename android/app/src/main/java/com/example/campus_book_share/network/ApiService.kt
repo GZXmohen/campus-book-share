@@ -7,6 +7,7 @@ import com.example.campus_book_share.model.Notification
 import com.example.campus_book_share.model.PostRequest
 import com.example.campus_book_share.model.PostResponse
 import com.example.campus_book_share.model.PublishPostResponse
+import com.example.campus_book_share.model.SimilarBookResponse
 import com.example.campus_book_share.model.UploadResponse
 import com.example.campus_book_share.model.User
 import com.example.campus_book_share.model.UserResponse
@@ -85,4 +86,8 @@ interface ApiService {
     fun getNotifications(): Call<NotificationListResponse>
     @PUT("api/user/notifications/{id}")
     fun markNotificationAsRead(@Path("id") id: Int): Call<NotificationResponse>
+
+    // 相似图书推荐接口
+    @GET("api/posts/{id}/similar")
+    fun getSimilarBooks(@Path("id") postId: Int, @Query("top_k") topK: Int = 5): Call<SimilarBookResponse>
 }

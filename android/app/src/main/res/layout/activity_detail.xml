@@ -157,6 +157,39 @@
                     android:visibility="gone" />
             </LinearLayout>
 
+            <!-- 相似图书推荐 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginVertical="16dp"/>
+
+            <TextView
+                android:text="相似图书推荐"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSimilarBooks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal" />
+
+            <TextView
+                android:id="@+id/tvNoSimilarBooks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="暂无相似图书"
+                android:textSize="14sp"
+                android:textColor="#999999"
+                android:gravity="center"
+                android:paddingVertical="32dp"
+                android:visibility="gone" />
+
             <!-- 评论区域 -->
             <View
                 android:layout_width="match_parent"

@@ -20,8 +20,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.campus_book_share.adapter.CommentAdapter
+import com.example.campus_book_share.adapter.SimilarBookAdapter
 import com.example.campus_book_share.model.Comment
 import com.example.campus_book_share.model.PublishPostResponse
+import com.example.campus_book_share.model.SimilarBook
 import com.example.campus_book_share.model.User
 import com.example.campus_book_share.model.UserResponse
 import com.example.campus_book_share.network.CommentRequest
@@ -34,12 +36,15 @@ import retrofit2.Callback
 
 class DetailActivity : AppCompatActivity() {
     private var postId: Int = -1
-    private var currentUserId: Int? = null // 改为可空类型
+    private var currentUserId: Int? = null
     private lateinit var rvComments: RecyclerView
     private lateinit var tvNoComments: TextView
     private lateinit var etComment: EditText
     private lateinit var btnSendComment: Button
     private lateinit var commentAdapter: CommentAdapter
+    private lateinit var rvSimilarBooks: RecyclerView
+    private lateinit var tvNoSimilarBooks: TextView
+    private var similarBookAdapter: SimilarBookAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +96,15 @@ class DetailActivity : AppCompatActivity() {
             deleteComment(commentId)
         }
         rvComments.adapter = commentAdapter
+
+        // 初始化相似图书列表
+        rvSimilarBooks = findViewById(R.id.rvSimilarBooks)
+        tvNoSimilarBooks = findViewById(R.id.tvNoSimilarBooks)
+        rvSimilarBooks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        similarBookAdapter = SimilarBookAdapter(emptyList()) { book ->
+            navigateToDetail(book.book_id)
+        }
+        rvSimilarBooks.adapter = similarBookAdapter
 
         findViewById<Button>(R.id.btnCopy).setOnClickListener {
             val wx = findViewById<TextView>(R.id.tvContactWx).text.toString().replace("微信号：", "")
@@ -205,6 +219,8 @@ class DetailActivity : AppCompatActivity() {
 
                     // 加载评论列表
                     loadComments()
+                    // 加载相似图书推荐
+                    loadSimilarBooks()
                 } else {
                     println("Failed to load post, response: ${response.body()}")
                     Toast.makeText(this@DetailActivity, "加载失败", Toast.LENGTH_SHORT).show()
@@ -239,6 +255,39 @@ class DetailActivity : AppCompatActivity() {
                 Toast.makeText(this@DetailActivity, "加载评论失败: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun loadSimilarBooks() {
+        RetrofitClient.apiService.getSimilarBooks(postId, 5).enqueue(object : Callback<com.example.campus_book_share.model.SimilarBookResponse> {
+            override fun onResponse(call: Call<com.example.campus_book_share.model.SimilarBookResponse>, response: Response<com.example.campus_book_share.model.SimilarBookResponse>) {
+                if (response.isSuccessful) {
+                    val books = response.body()?.data ?: emptyList()
+                    if (books.isEmpty()) {
+                        tvNoSimilarBooks.visibility = View.VISIBLE
+                        rvSimilarBooks.visibility = View.GONE
+                    } else {
+                        tvNoSimilarBooks.visibility = View.GONE
+                        rvSimilarBooks.visibility = View.VISIBLE
+                        similarBookAdapter?.updateData(books)
+                    }
+                } else {
+                    tvNoSimilarBooks.visibility = View.VISIBLE
+                    rvSimilarBooks.visibility = View.GONE
+                }
+            }
+
+            override fun onFailure(call: Call<com.example.campus_book_share.model.SimilarBookResponse>, t: Throwable) {
+                Toast.makeText(this@DetailActivity, "加载推荐失败: ${t.message}", Toast.LENGTH_SHORT).show()
+                tvNoSimilarBooks.visibility = View.VISIBLE
+                rvSimilarBooks.visibility = View.GONE
+            }
+        })
+    }
+
+    private fun navigateToDetail(bookId: Int) {
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra("POST_ID", bookId)
+        startActivity(intent)
     }
 
     private fun loadUserInfo() {
