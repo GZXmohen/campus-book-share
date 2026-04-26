@@ -41,6 +41,14 @@ def fetch_books():
 def get_similar_books(book_id):
     top_k = request.args.get('top_k', 5, type=int)
     print(f'[DEBUG] get_similar called with book_id={book_id} (type: {type(book_id)})')
+
+    books = fetch_books()
+    if books:
+        recommender.build_index(books)
+        print(f'[DEBUG] Refreshed index with {len(books)} books')
+    else:
+        print('[DEBUG] No books fetched, using existing index')
+
     print(f'[DEBUG] book_ids in index: {recommender.book_ids}')
     similar = recommender.get_similar(int(book_id), top_k=top_k)
     print(f'[DEBUG] similar result: {similar}')
@@ -62,6 +70,13 @@ def search_books():
             'message': 'keywords is required',
             'data': []
         })
+
+    books = fetch_books()
+    if books:
+        recommender.build_index(books)
+        print(f'[DEBUG] Refreshed index with {len(books)} books for search')
+    else:
+        print('[DEBUG] No books fetched for search, using existing index')
 
     results = recommender.search_by_keywords(keywords, top_k=top_k)
     return jsonify({
