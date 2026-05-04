@@ -28,8 +28,7 @@ server/
 │   ├── comment.go
 │   ├── notification.go
 │   ├── post.go
-│   ├── user.go
-│   └── user_behavior.go
+│   └── user.go
 ├── routes/          # 路由定义
 │   └── routes.go
 ├── uploads/         # 上传文件存储目录

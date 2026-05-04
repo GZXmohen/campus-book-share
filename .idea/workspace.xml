@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c67b9d8b-fcb1-4b19-92cd-17561523d82a" name="更改" comment="修复相似图书推荐算法不能自动刷新加载最新数据库数据的问题" />
+    <list default="true" id="c67b9d8b-fcb1-4b19-92cd-17561523d82a" name="更改" comment="修改md文件">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -139,7 +141,8 @@
     <MESSAGE value="添加基于 TF-IDF + 余弦相似度 的相似图书推荐服务" />
     <MESSAGE value="修改md文件，使项目介绍更详细、美观" />
     <MESSAGE value="修复相似图书推荐算法不能自动刷新加载最新数据库数据的问题" />
-    <option name="LAST_COMMIT_MESSAGE" value="修复相似图书推荐算法不能自动刷新加载最新数据库数据的问题" />
+    <MESSAGE value="修改md文件" />
+    <option name="LAST_COMMIT_MESSAGE" value="修改md文件" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
